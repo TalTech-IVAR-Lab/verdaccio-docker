@@ -67,26 +67,32 @@ then
 fi
 
 # deploy Verdaccio Docker to create volumes
+function_log_message "Initial run of Verdaccio docker-compose to generate volumes"
 docker-compose up -d
 
 # generate SSL certificates for HTTPS
 if [ $USE_HTTPS ]
 then
+  function_log_message "HTTPS requested. Installing OpenSSL"
   sudo apt install -y openssl
 
+  function_log_message "Generating SSL certificates"
   sudo openssl genrsa -out verdaccio-key.pem 2048
   sudo openssl req -new -sha256 -key verdaccio-key.pem -out verdaccio-csr.pem
   sudo openssl x509 -req -in verdaccio-csr.pem -signkey verdaccio-key.pem -out verdaccio-cert.pem
 
+  function_log_message "Moving SSL certificates"
   sudo mv verdaccio-csr.pem ${DOCKER_VOLUMES_ROOT}${VERDACCIO_CONFIG_VOLUME}verdaccio-csr.pem
   sudo mv verdaccio-key.pem ${DOCKER_VOLUMES_ROOT}${VERDACCIO_CONFIG_VOLUME}verdaccio-key.pem
   sudo mv verdaccio-cert.pem ${DOCKER_VOLUMES_ROOT}${VERDACCIO_CONFIG_VOLUME}verdaccio-cert.pem
 fi
 
 # copy our configuration into Verdaccio Docker volume
+function_log_message "Copying Verdaccio config to Docker volume"
 sudo cp config.yaml ${DOCKER_VOLUMES_ROOT}${VERDACCIO_CONFIG_VOLUME}config.yaml
 
 # re-deploy Verdaccio Docker to let it notice configuration changes
+function_log_message "Redeploying Verdaccio docker-compose"
 docker-compose up -d --force-recreate
 
 # TODO: copy config over to Verdaccio Docker volume?
