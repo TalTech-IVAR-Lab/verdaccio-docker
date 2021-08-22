@@ -40,7 +40,7 @@ function function_print_usage {
 # parse flag arguments
 while getopts 'kbi:c' flag; do
   case "${flag}" in
-    h) USE_HTTPS=true
+    h) USE_HTTPS=true;;
     z) ZEROTIER_NETWROK_ID=${OPTARG};;
     *) function_print_usage
        kill -INT $$ ;;
