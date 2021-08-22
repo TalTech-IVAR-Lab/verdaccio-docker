@@ -50,39 +50,44 @@ done
 
 
 # install Docker and Docker Compose
+function_log_message "Installing Docker and Docker Compose"
 sudo apt update
 sudo apt install -y docker docker-compose
 
 
 # ZeroTier installation and connection (https://www.zerotier.com/download/)
-if [ "$INSTANCE_ADDRESS" != "$EMPTY_STRING" ]; then
+if [ "$ZEROTIER_NETWROK_ID" != "$EMPTY_STRING" ]; then
   function_log_message "Installing ZeroTier One"
   sudo apt install gpg
   curl -s 'https://raw.githubusercontent.com/zerotier/ZeroTierOne/master/doc/contact%40zerotier.com.gpg' | gpg --import && \
   if z=$(curl -s 'https://install.zerotier.com/' | gpg); then echo "$z" | sudo bash; fi
 
   function_log_message "Connecting to ZeroTier network ID '$ZEROTIER_NETWROK_ID'"
-  zerotier-one join $ZEROTIER_NETWROK_ID
+  sudo zerotier-cli join $ZEROTIER_NETWROK_ID
 fi
 
 # deploy Verdaccio Docker to create volumes
 function_log_message "Initial run of Verdaccio docker-compose to generate volumes"
-docker-compose up -d
+sudo docker stop verdaccio
+sudo docker rm verdaccio
+sudo docker-compose up -d --force-recreate
 
 # generate SSL certificates for HTTPS
+sudo rm -rf https
 if $USE_HTTPS; then
   function_log_message "HTTPS requested. Installing OpenSSL"
   sudo apt install -y openssl
 
   function_log_message "Generating SSL certificates"
-  sudo openssl genrsa -out verdaccio-key.pem 2048
-  sudo openssl req -new -sha256 -key verdaccio-key.pem -out verdaccio-csr.pem
-  sudo openssl x509 -req -in verdaccio-csr.pem -signkey verdaccio-key.pem -out verdaccio-cert.pem
+  sudo mkdir https
+  sudo openssl genrsa -out https/verdaccio-key.pem 2048
+  sudo openssl req -new -sha256 -key https/verdaccio-key.pem -out https/verdaccio-csr.pem
+  sudo openssl x509 -req -in https/verdaccio-csr.pem -signkey https/verdaccio-key.pem -out https/verdaccio-cert.pem
 
   function_log_message "Moving SSL certificates"
-  sudo mv verdaccio-csr.pem ${DOCKER_VOLUMES_ROOT}${VERDACCIO_CONFIG_VOLUME}verdaccio-csr.pem
-  sudo mv verdaccio-key.pem ${DOCKER_VOLUMES_ROOT}${VERDACCIO_CONFIG_VOLUME}verdaccio-key.pem
-  sudo mv verdaccio-cert.pem ${DOCKER_VOLUMES_ROOT}${VERDACCIO_CONFIG_VOLUME}verdaccio-cert.pem
+  sudo mv https/verdaccio-csr.pem ${DOCKER_VOLUMES_ROOT}${VERDACCIO_CONFIG_VOLUME}verdaccio-csr.pem
+  sudo mv https/verdaccio-key.pem ${DOCKER_VOLUMES_ROOT}${VERDACCIO_CONFIG_VOLUME}verdaccio-key.pem
+  sudo mv https/verdaccio-cert.pem ${DOCKER_VOLUMES_ROOT}${VERDACCIO_CONFIG_VOLUME}verdaccio-cert.pem
 fi
 
 # copy our configuration into Verdaccio Docker volume
@@ -91,6 +96,6 @@ sudo cp config.yaml ${DOCKER_VOLUMES_ROOT}${VERDACCIO_CONFIG_VOLUME}config.yaml
 
 # re-deploy Verdaccio Docker to let it notice configuration changes
 function_log_message "Redeploying Verdaccio docker-compose"
-docker-compose up -d --force-recreate
+sudo docker-compose up -d --force-recreate
 
 # TODO: copy config over to Verdaccio Docker volume?
