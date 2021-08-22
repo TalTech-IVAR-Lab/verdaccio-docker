@@ -32,13 +32,14 @@ function function_log_message {
 function function_print_usage {
   echo -e "   "
   echo -e "  Deployment options:"
+  echo -e "    -h   Add this flag to enable HTTPS."
   echo -e "    -z   ZeroTier One network ID to connect to."
   echo -e "   "
 }
 
 
 # parse flag arguments
-while getopts 'kbi:c' flag; do
+while getopts 'hz:c' flag; do
   case "${flag}" in
     h) USE_HTTPS=true;;
     z) ZEROTIER_NETWROK_ID=${OPTARG};;
