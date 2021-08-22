@@ -55,8 +55,7 @@ sudo apt install -y docker docker-compose
 
 
 # ZeroTier installation and connection (https://www.zerotier.com/download/)
-if [ "$INSTANCE_ADDRESS" != "$EMPTY_STRING" ]
-then
+if [ "$INSTANCE_ADDRESS" != "$EMPTY_STRING" ]; then
   function_log_message "Installing ZeroTier One"
   sudo apt install gpg
   curl -s 'https://raw.githubusercontent.com/zerotier/ZeroTierOne/master/doc/contact%40zerotier.com.gpg' | gpg --import && \
@@ -71,8 +70,7 @@ function_log_message "Initial run of Verdaccio docker-compose to generate volume
 docker-compose up -d
 
 # generate SSL certificates for HTTPS
-if [ $USE_HTTPS ]
-then
+if $USE_HTTPS; then
   function_log_message "HTTPS requested. Installing OpenSSL"
   sudo apt install -y openssl
 
