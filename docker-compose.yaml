@@ -1,0 +1,31 @@
+version: '3.1'
+
+services:
+  verdaccio:
+    build: .
+    container_name: "verdaccio"
+    networks:
+      - node-network
+    environment:
+      - VERDACCIO_PORT=4242
+      - VERDACCIO_PROTOCOL=http
+    ports:
+      - "4242:4242"
+    volumes:
+      - conf:/verdaccio/conf
+      - storage:/verdaccio/storage
+      - plugins:/verdaccio/plugins
+      - logs:/verdaccio/logs
+    restart: always
+volumes:
+  conf:
+    driver: local
+  storage:
+    driver: local
+  plugins:
+    driver: local
+  logs:
+    driver: local
+networks:
+  node-network:
+    driver: bridge
