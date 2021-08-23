@@ -1,4 +1,4 @@
-Quick-start repo for setting up a Verdaccio server for Unity packages with optional ZeroTier virtual network.
+Quick-start repo for setting up a [Verdaccio][1] server for Unity packages with optional [ZeroTier][2] virtual network.
 
 Clone using this command for easy read-only access:
 ```
@@ -12,3 +12,6 @@ bash deploy.sh -z YOUR_ZEROTIER_NETWORK_ID
 ```
 
 After the deployment is successful, you will be able to access Verdaccio on port `4242` of your machine through `HTTP`.
+
+[1]: https://verdaccio.org/
+[2]: https://www.zerotier.com/
