@@ -94,6 +94,10 @@ fi
 function_log_message "Copying Verdaccio config to Docker volume"
 sudo cp config.yaml ${DOCKER_VOLUMES_ROOT}${VERDACCIO_CONFIG_VOLUME}config.yaml
 
+# generate password file and configure permissions to allow Verdaccio access it
+sudo touch ${DOCKER_VOLUMES_ROOT}${VERDACCIO_CONFIG_VOLUME}dolcevita
+sudo chown -R 10001:65533 ${DOCKER_VOLUMES_ROOT}${VERDACCIO_CONFIG_VOLUME}dolcevita
+
 # re-deploy Verdaccio Docker to let it notice configuration changes
 function_log_message "Redeploying Verdaccio docker-compose"
 sudo docker-compose up -d --force-recreate
