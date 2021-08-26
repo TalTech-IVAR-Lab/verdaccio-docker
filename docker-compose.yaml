@@ -5,7 +5,6 @@ services:
     build: .
     image: "verdaccio/verdaccio:5"
     container_name: "verdaccio"
-    # privileged: true
     networks:
       - node-network
     environment:
