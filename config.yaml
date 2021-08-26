@@ -1,7 +1,4 @@
 #
-# This is the default config file. It allows all users to do anything,
-# so don't use it on production systems.
-#
 # Look here for more config file examples:
 # https://github.com/verdaccio/verdaccio/tree/master/conf
 #
@@ -9,21 +6,16 @@
 # path to a directory with all packages
 storage: /verdaccio/storage
 # path to a directory with plugins to include
-# plugins: ./plugins
+plugins: /verdaccio/plugins
 
 #listen:
 #  - 0.0.0.0:4242
-
-https:
-  key: /verdaccio/conf/verdaccio-key.pem
-  cert: /verdaccio/conf/verdaccio-cert.pem
-  ca: /verdaccio/conf/verdaccio-csr.pem
 
 web:
   title: Verdaccio
   # comment out to disable gravatar support
   # gravatar: false
-  # by default packages are orderced ascendant (asc|desc)
+  # by default packages are ordercer ascendant (asc|desc)
   # sort_packages: asc
   # convert your UI to the dark side
   darkMode: true
@@ -37,20 +29,19 @@ web:
 
 auth:
   htpasswd:
-    file: /verdaccio/conf/dolcevita # why? because!
+    file: /verdaccio/conf/dolcevita
     # Maximum amount of users allowed to register, defaults to "+inf".
     # You can set this to -1 to disable registration.
     max_users: -1
 
 # a list of other known repositories we can talk to
 uplinks:
-  npmjs:
-    url: https://registry.npmjs.org/
+ npmjs:
+   url: https://registry.npmjs.org/
 
 packages:
   '**':
-    # any actions with packages require authentication
-    access: $authenticated
+    access: $all
     publish: $authenticated
     unpublish: $authenticated
     proxy: npmjs
@@ -66,7 +57,7 @@ middlewares:
     enabled: true
 
 # log settings
-logs: { type: stdout, format: pretty, level: http }
+logs: { type: stdout, format: pretty, level: debug }
 
 #experiments:
 #  # support for npm token command

@@ -17,6 +17,7 @@ BLINK='\e[33;5m'
 EMPTY_STRING=""
 DOCKER_VOLUMES_ROOT="/var/lib/docker/volumes/"
 VERDACCIO_CONFIG_VOLUME="verdaccio-zerotier-docker_conf/_data/"
+VERDACCIO_REGISTRY="http://0.0.0.0:4242"
 
 
 # functions
@@ -64,11 +65,11 @@ fi
 
 
 # install htpasswd
-function_log_message "Updating htpasswd"
+function_log_message "Updating htpasswd..."
 sudo npm install -g htpasswd
 
 
 # create user
-function_log_message "Setting up user '$USER_NAME'"
+function_log_message "Setting up user '$USER_NAME'..."
 sudo htpasswd ${DOCKER_VOLUMES_ROOT}${VERDACCIO_CONFIG_VOLUME}dolcevita ${USER_NAME}
 function_log_message "Done"

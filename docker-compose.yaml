@@ -3,7 +3,9 @@ version: '3.1'
 services:
   verdaccio:
     build: .
+    image: "verdaccio/verdaccio:5"
     container_name: "verdaccio"
+    # privileged: true
     networks:
       - node-network
     environment:

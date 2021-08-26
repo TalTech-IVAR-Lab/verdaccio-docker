@@ -17,6 +17,8 @@ BLINK='\e[33;5m'
 EMPTY_STRING=""
 DOCKER_VOLUMES_ROOT="/var/lib/docker/volumes/"
 VERDACCIO_CONFIG_VOLUME="verdaccio-zerotier-docker_conf/_data/"
+VERDACCIO_STORAGE_VOLUME="verdaccio-zerotier-docker_storage/_data/"
+VERDACCIO_PLUGINS_VOLUME="verdaccio-zerotier-docker_plugins/_data/"
 
 
 # variables
@@ -94,9 +96,13 @@ fi
 function_log_message "Copying Verdaccio config to Docker volume"
 sudo cp config.yaml ${DOCKER_VOLUMES_ROOT}${VERDACCIO_CONFIG_VOLUME}config.yaml
 
-# generate password file and configure permissions to allow Verdaccio access it
+# generate password file
 sudo touch ${DOCKER_VOLUMES_ROOT}${VERDACCIO_CONFIG_VOLUME}dolcevita
-sudo chown -R 10001:65533 ${DOCKER_VOLUMES_ROOT}${VERDACCIO_CONFIG_VOLUME}dolcevita
+
+# configure folder permissions to allow Verdaccio access
+sudo chown -R 10001:65533 ${DOCKER_VOLUMES_ROOT}${VERDACCIO_CONFIG_VOLUME}
+sudo chown -R 10001:65533 ${DOCKER_VOLUMES_ROOT}${VERDACCIO_STORAGE_VOLUME}
+sudo chown -R 10001:65533 ${DOCKER_VOLUMES_ROOT}${VERDACCIO_PLUGINS_VOLUME}
 
 # re-deploy Verdaccio Docker to let it notice configuration changes
 function_log_message "Redeploying Verdaccio docker-compose"
