@@ -36,15 +36,19 @@ auth:
 
 # a list of other known repositories we can talk to
 uplinks:
- npmjs:
-   url: https://registry.npmjs.org/
+  npmjs:
+    url: https://registry.npmjs.org/
+  unity:
+    url: https://packages.unity.com
 
 packages:
   '**':
     access: $all
     publish: $authenticated
     unpublish: $authenticated
-    proxy: npmjs
+    proxy:
+      - npmjs
+      - unity
 
 # You can specify HTTP/1.1 server keep alive timeout in seconds for incoming connections.
 # A value of 0 makes the http server behave similarly to Node.js versions prior to 8.0.0, which did not have a keep-alive timeout.
