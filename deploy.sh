@@ -24,6 +24,8 @@ VERDACCIO_PLUGINS_VOLUME="verdacciozerotierdocker_plugins/_data/"
 # variables
 USE_HTTPS=false
 ZEROTIER_NETWROK_ID=""
+VERDACCIO_PROTOCOL=http
+VERDACCIO_PORT=4242
 
 
 # functions
@@ -66,6 +68,10 @@ if [ "$ZEROTIER_NETWROK_ID" != "$EMPTY_STRING" ]; then
 
   function_log_message "Connecting to ZeroTier network ID '$ZEROTIER_NETWROK_ID'"
   sudo zerotier-cli join $ZEROTIER_NETWROK_ID
+fi
+
+if $USE_HTTPS; then
+  VERDACCIO_PROTOCOL=https
 fi
 
 # deploy Verdaccio Docker to create volumes
