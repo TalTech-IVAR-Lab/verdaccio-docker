@@ -8,10 +8,10 @@ services:
     networks:
       - node-network
     environment:
-      - VERDACCIO_PORT="${VERDACCIO_PORT}"
-      - VERDACCIO_PROTOCOL="${VERDACCIO_PROTOCOL}"
+      - VERDACCIO_PORT=$VERDACCIO_PORT
+      - VERDACCIO_PROTOCOL=$VERDACCIO_PROTOCOL
     ports:
-      - "${VERDACCIO_PORT}":"${VERDACCIO_PORT}"
+      - $VERDACCIO_PORT:$VERDACCIO_PORT
     volumes:
       - conf:/verdaccio/conf
       - storage:/verdaccio/storage
