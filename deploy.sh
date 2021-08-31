@@ -59,7 +59,7 @@ done
 
 
 # set environment variables in the .env file
-if $USE_HTTPS && $CREATE_HTTPS_CERTS; then
+if $USE_HTTPS; then
   VERDACCIO_PROTOCOL=https
 fi
 sudo echo -e "VERDACCIO_PORT=${VERDACCIO_PORT}\nVERDACCIO_PROTOCOL=${VERDACCIO_PROTOCOL}\n" | sudo tee .env
@@ -89,7 +89,7 @@ sudo docker-compose up -d --force-recreate
 
 # generate SSL certificates for HTTPS
 sudo rm -rf https
-if $USE_HTTPS; then
+if $USE_HTTPS && $CREATE_HTTPS_CERTS; then
   function_log_message "HTTPS requested. Installing OpenSSL"
   sudo apt install -y openssl
 
