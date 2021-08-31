@@ -53,6 +53,12 @@ while getopts 'hz:c' flag; do
 done
 
 
+# set environment variables in the .env file
+if $USE_HTTPS; then
+  VERDACCIO_PROTOCOL=https
+fi
+sudo echo -e "VERDACCIO_PORT=${VERDACCIO_PORT}\nVERDACCIO_PROTOCOL=${VERDACCIO_PROTOCOL}\n" | sudo tee .env
+
 # install Docker and Docker Compose
 function_log_message "Installing Docker and Docker Compose"
 sudo apt update
@@ -68,10 +74,6 @@ if [ "$ZEROTIER_NETWROK_ID" != "$EMPTY_STRING" ]; then
 
   function_log_message "Connecting to ZeroTier network ID '$ZEROTIER_NETWROK_ID'"
   sudo zerotier-cli join $ZEROTIER_NETWROK_ID
-fi
-
-if $USE_HTTPS; then
-  VERDACCIO_PROTOCOL=https
 fi
 
 # deploy Verdaccio Docker to create volumes
