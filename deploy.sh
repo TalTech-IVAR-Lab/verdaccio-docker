@@ -59,20 +59,21 @@ done
 
 
 # set environment variables in the .env file
+function_log_message "Setting environment variables:"
 if $USE_HTTPS; then
   VERDACCIO_PROTOCOL=https
 fi
 sudo echo -e "VERDACCIO_PORT=${VERDACCIO_PORT}\nVERDACCIO_PROTOCOL=${VERDACCIO_PROTOCOL}\n" | sudo tee .env
 
 # install Docker and Docker Compose
-function_log_message "Installing Docker and Docker Compose"
+function_log_message "Installing Docker and Docker Compose..."
 sudo apt update
 sudo apt install -y docker docker-compose
 
 
 # ZeroTier installation and connection (https://www.zerotier.com/download/)
 if [ "$ZEROTIER_NETWROK_ID" != "$EMPTY_STRING" ]; then
-  function_log_message "Installing ZeroTier One"
+  function_log_message "Installing ZeroTier One..."
   sudo apt install gpg
   curl -s 'https://raw.githubusercontent.com/zerotier/ZeroTierOne/master/doc/contact%40zerotier.com.gpg' | gpg --import && \
   if z=$(curl -s 'https://install.zerotier.com/' | gpg); then echo "$z" | sudo bash; fi
@@ -82,7 +83,7 @@ if [ "$ZEROTIER_NETWROK_ID" != "$EMPTY_STRING" ]; then
 fi
 
 # deploy Verdaccio Docker to create volumes
-function_log_message "Initial run of Verdaccio docker-compose to generate volumes"
+function_log_message "Initial run of Verdaccio docker-compose to generate volumes..."
 sudo docker stop verdaccio
 sudo docker rm verdaccio
 sudo docker-compose up -d --force-recreate
@@ -90,23 +91,23 @@ sudo docker-compose up -d --force-recreate
 # generate SSL certificates for HTTPS
 sudo rm -rf https
 if $USE_HTTPS && $CREATE_HTTPS_CERTS; then
-  function_log_message "HTTPS requested. Installing OpenSSL"
+  function_log_message "HTTPS requested. Installing OpenSSL..."
   sudo apt install -y openssl
 
-  function_log_message "Generating SSL certificates"
+  function_log_message "Generating SSL certificates..."
   sudo mkdir https
   sudo openssl genrsa -out https/verdaccio-key.pem 2048
   sudo openssl req -new -sha256 -key https/verdaccio-key.pem -out https/verdaccio-csr.pem
   sudo openssl x509 -req -in https/verdaccio-csr.pem -signkey https/verdaccio-key.pem -out https/verdaccio-cert.pem
 
-  function_log_message "Moving SSL certificates"
+  function_log_message "Moving SSL certificates..."
   sudo mv https/verdaccio-csr.pem ${DOCKER_VOLUMES_ROOT}${VERDACCIO_CONFIG_VOLUME}verdaccio-csr.pem
   sudo mv https/verdaccio-key.pem ${DOCKER_VOLUMES_ROOT}${VERDACCIO_CONFIG_VOLUME}verdaccio-key.pem
   sudo mv https/verdaccio-cert.pem ${DOCKER_VOLUMES_ROOT}${VERDACCIO_CONFIG_VOLUME}verdaccio-cert.pem
 fi
 
 # copy our configuration into Verdaccio Docker volume
-function_log_message "Copying Verdaccio config to Docker volume"
+function_log_message "Copying Verdaccio config to Docker volume..."
 sudo cp config.yaml ${DOCKER_VOLUMES_ROOT}${VERDACCIO_CONFIG_VOLUME}config.yaml
 
 # generate password file
@@ -118,7 +119,7 @@ sudo chown -R 10001:65533 ${DOCKER_VOLUMES_ROOT}${VERDACCIO_STORAGE_VOLUME}
 sudo chown -R 10001:65533 ${DOCKER_VOLUMES_ROOT}${VERDACCIO_PLUGINS_VOLUME}
 
 # re-deploy Verdaccio Docker to let it notice configuration changes
-function_log_message "Redeploying Verdaccio docker-compose"
+function_log_message "Redeploying Verdaccio docker-compose..."
 sudo docker-compose up -d --force-recreate
 
 # TODO: copy config over to Verdaccio Docker volume?
