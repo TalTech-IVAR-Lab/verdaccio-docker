@@ -23,6 +23,7 @@ VERDACCIO_PLUGINS_VOLUME="verdacciozerotierdocker_plugins/_data/"
 
 # variables
 USE_HTTPS=false
+CREATE_HTTPS_CERTS=true
 ZEROTIER_NETWROK_ID=""
 VERDACCIO_PROTOCOL=http
 VERDACCIO_PORT=4242
@@ -37,15 +38,19 @@ function function_print_usage {
   echo -e "   "
   echo -e "  Deployment options:"
   echo -e "    -h   Add this flag to enable HTTPS."
+  echo -e "    -s   Skip HTTPS certificate generation (use if the certs were already generated before)."
+  echo -e "    -p   Port this Verdaccio instance should run on."
   echo -e "    -z   ZeroTier One network ID to connect to."
   echo -e "   "
 }
 
 
 # parse flag arguments
-while getopts 'hz:c' flag; do
+while getopts 'hspz:c' flag; do
   case "${flag}" in
     h) USE_HTTPS=true;;
+    s) CREATE_HTTPS_CERTS=false;;
+    p) VERDACCIO_PORT=${OPTARG};;
     z) ZEROTIER_NETWROK_ID=${OPTARG};;
     *) function_print_usage
        kill -INT $$ ;;
@@ -54,7 +59,7 @@ done
 
 
 # set environment variables in the .env file
-if $USE_HTTPS; then
+if $USE_HTTPS && $CREATE_HTTPS_CERTS; then
   VERDACCIO_PROTOCOL=https
 fi
 sudo echo -e "VERDACCIO_PORT=${VERDACCIO_PORT}\nVERDACCIO_PROTOCOL=${VERDACCIO_PROTOCOL}\n" | sudo tee .env
