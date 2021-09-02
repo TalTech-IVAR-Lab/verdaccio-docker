@@ -18,15 +18,30 @@ services:
       - plugins:/verdaccio/plugins
       - logs:/verdaccio/logs
     restart: always
-volumes:
-  conf:
-    driver: local
-  storage:
-    driver: local
-  plugins:
-    driver: local
-  logs:
-    driver: local
-networks:
-  node-network:
-    driver: bridge
+  volumes:
+    conf:
+      driver: local
+    storage:
+      driver: local
+    plugins:
+      driver: local
+    logs:
+      driver: local
+# networks:
+#   node-network:
+#     driver: bridge
+
+caddy:
+    image: abiosoft/caddy
+    restart: always
+    environment:
+      - ACME_AGREE=true
+      - DOMAIN_NPM=$VERDACCIO_DOMAIN
+      - EMAIL=$VERDACCIO_EMAIL
+      - VERDACCIO_PORT=$VERDACCIO_PORT
+    ports:
+      - 80:80
+      - 443:443
+    volumes:
+      - ./Caddyfile:/etc/Caddyfile:ro
+      - caddycerts:/root/.caddy
