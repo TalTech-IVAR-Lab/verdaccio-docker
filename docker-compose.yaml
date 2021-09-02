@@ -18,18 +18,6 @@ services:
       - storage:/verdaccio/storage
       - plugins:/verdaccio/plugins
       - logs:/verdaccio/logs
-    volumes:
-      conf:
-        driver: local
-      storage:
-        driver: local
-      plugins:
-        driver: local
-      logs:
-        driver: local
-# networks:
-#   node-network:
-#     driver: bridge
 
   caddy:
     image: abiosoft/caddy
@@ -44,4 +32,18 @@ services:
       - 443:443
     volumes:
       - ./Caddyfile:/etc/Caddyfile:ro
-      - caddycerts:/root/.caddy
+      - caddycerts:/root/.
+
+volumes:
+  conf:
+    driver: local
+  storage:
+    driver: local
+  plugins:
+    driver: local
+  logs:
+    driver: local
+
+# networks:
+#   node-network:
+#     driver: bridge

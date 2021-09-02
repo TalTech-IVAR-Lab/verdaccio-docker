@@ -27,6 +27,8 @@ CREATE_HTTPS_CERTS=true
 ZEROTIER_NETWROK_ID=""
 VERDACCIO_PROTOCOL=http
 VERDACCIO_PORT=4242
+VERDACCIO_DOMAIN=""
+VERDACCIO_EMAIL=""
 
 
 # functions
@@ -38,6 +40,8 @@ function function_print_usage {
   echo -e "   "
   echo -e "  Deployment options:"
   echo -e "    -h   Add this flag to enable HTTPS."
+  echo -e "    -d   Domain name to use for HTTTPS setup."
+  echo -e "    -e   Email to use for HTTTPS setup."
   echo -e "    -s   Skip HTTPS certificate generation (use if the certs were already generated before)."
   echo -e "    -p   Port this Verdaccio instance should run on."
   echo -e "    -z   ZeroTier One network ID to connect to."
@@ -46,9 +50,11 @@ function function_print_usage {
 
 
 # parse flag arguments
-while getopts 'hspz:c' flag; do
+while getopts 'hdspz:c' flag; do
   case "${flag}" in
     h) USE_HTTPS=true;;
+    d) VERDACCIO_DOMAIN=${OPTARG};;
+    e) VERDACCIO_EMAIL=${OPTARG};;
     s) CREATE_HTTPS_CERTS=false;;
     p) VERDACCIO_PORT=${OPTARG};;
     z) ZEROTIER_NETWROK_ID=${OPTARG};;
@@ -63,7 +69,7 @@ function_log_message "Setting environment variables:"
 if $USE_HTTPS; then
   VERDACCIO_PROTOCOL=https
 fi
-sudo echo -e "VERDACCIO_PORT=${VERDACCIO_PORT}\nVERDACCIO_PROTOCOL=${VERDACCIO_PROTOCOL}\n" | sudo tee .env
+sudo echo -e "VERDACCIO_PORT=${VERDACCIO_PORT}\nVERDACCIO_PROTOCOL=${VERDACCIO_PROTOCOL}\nVERDACCIO_DOMAIN=${VERDACCIO_DOMAIN}\nVERDACCIO_EMAIL=${VERDACCIO_EMAIL}" | sudo tee .env
 
 # install Docker and Docker Compose
 function_log_message "Installing Docker and Docker Compose..."
