@@ -15,7 +15,7 @@ BLINK='\e[33;5m'
 
 # constants
 EMPTY_STRING=""
-VOLUMES_ROOT="./"
+VOLUMES_ROOT="./volumes/"
 VERDACCIO_CONFIG_VOLUME="verdaccio_conf/"
 VERDACCIO_STORAGE_VOLUME="verdaccio_storage/"
 VERDACCIO_PLUGINS_VOLUME="verdaccio_plugins/"
@@ -96,6 +96,7 @@ fi
 # sudo docker-compose up -d --force-recreate
 
 # create directories
+function_log_message "Creating directories..."
 sudo mkdir ${VOLUMES_ROOT}${VERDACCIO_CONFIG_VOLUME}
 sudo mkdir ${VOLUMES_ROOT}${VERDACCIO_STORAGE_VOLUME}
 sudo mkdir ${VOLUMES_ROOT}${VERDACCIO_PLUGINS_VOLUME}

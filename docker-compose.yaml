@@ -14,10 +14,10 @@ services:
     ports:
       - $VERDACCIO_PORT:$VERDACCIO_PORT
     volumes:
-      - ./conf:/verdaccio/conf
-      - ./storage:/verdaccio/storage
-      - ./plugins:/verdaccio/plugins
-      - ./logs:/verdaccio/logs
+      - ./volumes/verdaccio_conf:/verdaccio/conf
+      - ./volumes/verdaccio_storage:/verdaccio/storage
+      - ./volumes/verdaccio_plugins:/verdaccio/plugins
+      - ./volumes/verdaccio_logs:/verdaccio/logs
 
   # caddy:
   #   image: abiosoft/caddy
