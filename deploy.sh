@@ -15,10 +15,11 @@ BLINK='\e[33;5m'
 
 # constants
 EMPTY_STRING=""
-DOCKER_VOLUMES_ROOT="./"
+VOLUMES_ROOT="./"
 VERDACCIO_CONFIG_VOLUME="verdaccio_conf/"
 VERDACCIO_STORAGE_VOLUME="verdaccio_storage/"
 VERDACCIO_PLUGINS_VOLUME="verdaccio_plugins/"
+VERDACCIO_LOGS_VOLUME="verdaccio_plugins/"
 
 
 # variables
@@ -88,11 +89,17 @@ if [ "$ZEROTIER_NETWROK_ID" != "$EMPTY_STRING" ]; then
   sudo zerotier-cli join $ZEROTIER_NETWROK_ID
 fi
 
-# deploy Verdaccio Docker to create volumes
-function_log_message "Initial run of Verdaccio docker-compose to generate volumes..."
-sudo docker stop verdaccio
-sudo docker rm verdaccio
-sudo docker-compose up -d --force-recreate
+# # deploy Verdaccio Docker to create volumes
+# function_log_message "Initial run of Verdaccio docker-compose to generate volumes..."
+# sudo docker stop verdaccio
+# sudo docker rm verdaccio
+# sudo docker-compose up -d --force-recreate
+
+# create directories
+sudo mkdir ${VOLUMES_ROOT}${VERDACCIO_CONFIG_VOLUME}
+sudo mkdir ${VOLUMES_ROOT}${VERDACCIO_STORAGE_VOLUME}
+sudo mkdir ${VOLUMES_ROOT}${VERDACCIO_PLUGINS_VOLUME}
+sudo mkdir ${VOLUMES_ROOT}${VERDACCIO_LOGS_VOLUME}
 
 # generate SSL certificates for HTTPS
 sudo rm -rf https
@@ -107,22 +114,23 @@ if $USE_HTTPS && $CREATE_HTTPS_CERTS; then
   sudo openssl x509 -req -in https/verdaccio-csr.pem -signkey https/verdaccio-key.pem -out https/verdaccio-cert.pem
 
   function_log_message "Moving SSL certificates..."
-  sudo mv https/verdaccio-csr.pem ${DOCKER_VOLUMES_ROOT}${VERDACCIO_CONFIG_VOLUME}verdaccio-csr.pem
-  sudo mv https/verdaccio-key.pem ${DOCKER_VOLUMES_ROOT}${VERDACCIO_CONFIG_VOLUME}verdaccio-key.pem
-  sudo mv https/verdaccio-cert.pem ${DOCKER_VOLUMES_ROOT}${VERDACCIO_CONFIG_VOLUME}verdaccio-cert.pem
+  sudo mv https/verdaccio-csr.pem ${VOLUMES_ROOT}${VERDACCIO_CONFIG_VOLUME}verdaccio-csr.pem
+  sudo mv https/verdaccio-key.pem ${VOLUMES_ROOT}${VERDACCIO_CONFIG_VOLUME}verdaccio-key.pem
+  sudo mv https/verdaccio-cert.pem ${VOLUMES_ROOT}${VERDACCIO_CONFIG_VOLUME}verdaccio-cert.pem
 fi
 
 # copy our configuration into Verdaccio Docker volume
 function_log_message "Copying Verdaccio config to Docker volume..."
-sudo cp config.yaml ${DOCKER_VOLUMES_ROOT}${VERDACCIO_CONFIG_VOLUME}config.yaml
+sudo cp config.yaml ${VOLUMES_ROOT}${VERDACCIO_CONFIG_VOLUME}config.yaml
 
 # generate password file
-sudo touch ${DOCKER_VOLUMES_ROOT}${VERDACCIO_CONFIG_VOLUME}dolcevita
+sudo touch ${VOLUMES_ROOT}${VERDACCIO_CONFIG_VOLUME}dolcevita
 
 # configure folder permissions to allow Verdaccio access
 sudo chown -R 10001:65533 ${DOCKER_VOLUMES_ROOT}${VERDACCIO_CONFIG_VOLUME}
 sudo chown -R 10001:65533 ${DOCKER_VOLUMES_ROOT}${VERDACCIO_STORAGE_VOLUME}
 sudo chown -R 10001:65533 ${DOCKER_VOLUMES_ROOT}${VERDACCIO_PLUGINS_VOLUME}
+sudo chown -R 10001:65533 ${DOCKER_VOLUMES_ROOT}${VERDACCIO_LOGS_VOLUME}
 
 # re-deploy Verdaccio Docker to let it notice configuration changes
 function_log_message "Redeploying Verdaccio docker-compose..."
