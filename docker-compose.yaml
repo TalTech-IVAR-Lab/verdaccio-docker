@@ -6,8 +6,8 @@ services:
     container_name: verdaccio
     build: .
     restart: always
-    networks:
-      - node-network
+    # networks:
+    #   - node-network
     environment:
       - VERDACCIO_PORT=$VERDACCIO_PORT
       - VERDACCIO_PROTOCOL=$VERDACCIO_PROTOCOL
