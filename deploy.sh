@@ -50,11 +50,11 @@ function function_print_usage {
 
 
 # parse flag arguments
-while getopts 'hdspz:c' flag; do
+while getopts 'dehspz:c' flag; do
   case "${flag}" in
-    h) USE_HTTPS=true;;
     d) VERDACCIO_DOMAIN=${OPTARG};;
     e) VERDACCIO_EMAIL=${OPTARG};;
+    h) USE_HTTPS=true;;
     s) CREATE_HTTPS_CERTS=false;;
     p) VERDACCIO_PORT=${OPTARG};;
     z) ZEROTIER_NETWROK_ID=${OPTARG};;
