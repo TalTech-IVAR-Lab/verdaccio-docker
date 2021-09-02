@@ -128,10 +128,10 @@ sudo cp config.yaml ${VOLUMES_ROOT}${VERDACCIO_CONFIG_VOLUME}config.yaml
 sudo touch ${VOLUMES_ROOT}${VERDACCIO_CONFIG_VOLUME}dolcevita
 
 # configure folder permissions to allow Verdaccio access
-sudo chown -R 10001:65533 ${DOCKER_VOLUMES_ROOT}${VERDACCIO_CONFIG_VOLUME}
-sudo chown -R 10001:65533 ${DOCKER_VOLUMES_ROOT}${VERDACCIO_STORAGE_VOLUME}
-sudo chown -R 10001:65533 ${DOCKER_VOLUMES_ROOT}${VERDACCIO_PLUGINS_VOLUME}
-sudo chown -R 10001:65533 ${DOCKER_VOLUMES_ROOT}${VERDACCIO_LOGS_VOLUME}
+sudo chown -R 10001:65533 ${VOLUMES_ROOT}${VERDACCIO_CONFIG_VOLUME}
+sudo chown -R 10001:65533 ${VOLUMES_ROOT}${VERDACCIO_STORAGE_VOLUME}
+sudo chown -R 10001:65533 ${VOLUMES_ROOT}${VERDACCIO_PLUGINS_VOLUME}
+sudo chown -R 10001:65533 ${VOLUMES_ROOT}${VERDACCIO_LOGS_VOLUME}
 
 # re-deploy Verdaccio Docker to let it notice configuration changes
 function_log_message "Redeploying Verdaccio docker-compose..."
