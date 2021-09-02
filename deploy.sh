@@ -19,7 +19,7 @@ VOLUMES_ROOT="./volumes/"
 VERDACCIO_CONFIG_VOLUME="verdaccio_conf/"
 VERDACCIO_STORAGE_VOLUME="verdaccio_storage/"
 VERDACCIO_PLUGINS_VOLUME="verdaccio_plugins/"
-VERDACCIO_LOGS_VOLUME="verdaccio_plugins/"
+VERDACCIO_LOGS_VOLUME="verdaccio_logs/"
 
 
 # variables
