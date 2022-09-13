@@ -25,7 +25,6 @@ VERDACCIO_LOGS_VOLUME="verdaccio_logs/"
 # variables
 USE_HTTPS=false
 CREATE_HTTPS_CERTS=true
-ZEROTIER_NETWROK_ID=""
 VERDACCIO_PROTOCOL=http
 VERDACCIO_PORT=4242
 VERDACCIO_DOMAIN=""
@@ -45,7 +44,6 @@ function function_print_usage {
   echo -e "    -e   Email to use for HTTTPS setup."
   echo -e "    -s   Skip HTTPS certificate generation (use if the certs were already generated before)."
   echo -e "    -p   Port this Verdaccio instance should run on."
-  echo -e "    -z   ZeroTier One network ID to connect to."
   echo -e "   "
 }
 
@@ -58,7 +56,6 @@ while getopts 'hsdepz:c' flag; do
     d) VERDACCIO_DOMAIN=${OPTARG};;
     e) VERDACCIO_EMAIL=${OPTARG};;
     p) VERDACCIO_PORT=${OPTARG};;
-    z) ZEROTIER_NETWROK_ID=${OPTARG};;
     *) function_print_usage
        kill -INT $$ ;;
   esac
@@ -77,18 +74,6 @@ function_log_message "Installing Docker and Docker Compose..."
 sudo apt update
 sudo apt install -y docker docker-compose
 
-
-# ZeroTier installation and connection (https://www.zerotier.com/download/)
-if [ "$ZEROTIER_NETWROK_ID" != "$EMPTY_STRING" ]; then
-  function_log_message "Installing ZeroTier One..."
-  sudo apt install gpg
-  curl -s 'https://raw.githubusercontent.com/zerotier/ZeroTierOne/master/doc/contact%40zerotier.com.gpg' | gpg --import && \
-  if z=$(curl -s 'https://install.zerotier.com/' | gpg); then echo "$z" | sudo bash; fi
-
-  function_log_message "Connecting to ZeroTier network ID '$ZEROTIER_NETWROK_ID'"
-  sudo zerotier-cli join $ZEROTIER_NETWROK_ID
-fi
-
 # # deploy Verdaccio Docker to create volumes
 # function_log_message "Initial run of Verdaccio docker-compose to generate volumes..."
 # sudo docker stop verdaccio
@@ -97,10 +82,10 @@ fi
 
 # create directories
 function_log_message "Creating directories..."
-sudo mkdir ${VOLUMES_ROOT}${VERDACCIO_CONFIG_VOLUME}
-sudo mkdir ${VOLUMES_ROOT}${VERDACCIO_STORAGE_VOLUME}
-sudo mkdir ${VOLUMES_ROOT}${VERDACCIO_PLUGINS_VOLUME}
-sudo mkdir ${VOLUMES_ROOT}${VERDACCIO_LOGS_VOLUME}
+sudo mkdir ${VOLUMES_ROOT}/${VERDACCIO_CONFIG_VOLUME}
+sudo mkdir ${VOLUMES_ROOT}/${VERDACCIO_STORAGE_VOLUME}
+sudo mkdir ${VOLUMES_ROOT}/${VERDACCIO_PLUGINS_VOLUME}
+sudo mkdir ${VOLUMES_ROOT}/${VERDACCIO_LOGS_VOLUME}
 
 # generate SSL certificates for HTTPS
 sudo rm -rf https
@@ -115,23 +100,23 @@ if $USE_HTTPS && $CREATE_HTTPS_CERTS; then
   sudo openssl x509 -req -in https/verdaccio-csr.pem -signkey https/verdaccio-key.pem -out https/verdaccio-cert.pem
 
   function_log_message "Moving SSL certificates..."
-  sudo mv https/verdaccio-csr.pem ${VOLUMES_ROOT}${VERDACCIO_CONFIG_VOLUME}verdaccio-csr.pem
-  sudo mv https/verdaccio-key.pem ${VOLUMES_ROOT}${VERDACCIO_CONFIG_VOLUME}verdaccio-key.pem
-  sudo mv https/verdaccio-cert.pem ${VOLUMES_ROOT}${VERDACCIO_CONFIG_VOLUME}verdaccio-cert.pem
+  sudo mv https/verdaccio-csr.pem ${VOLUMES_ROOT}/${VERDACCIO_CONFIG_VOLUME}/verdaccio-csr.pem
+  sudo mv https/verdaccio-key.pem ${VOLUMES_ROOT}/${VERDACCIO_CONFIG_VOLUME}/verdaccio-key.pem
+  sudo mv https/verdaccio-cert.pem ${VOLUMES_ROOT}/${VERDACCIO_CONFIG_VOLUME}/verdaccio-cert.pem
 fi
 
 # copy our configuration into Verdaccio Docker volume
 function_log_message "Copying Verdaccio config to Docker volume..."
-sudo cp config.yaml ${VOLUMES_ROOT}${VERDACCIO_CONFIG_VOLUME}config.yaml
+sudo cp config.yaml ${VOLUMES_ROOT}/${VERDACCIO_CONFIG_VOLUME}/config.yaml
 
 # generate password file
-sudo touch ${VOLUMES_ROOT}${VERDACCIO_CONFIG_VOLUME}dolcevita
+sudo touch ${VOLUMES_ROOT}/${VERDACCIO_CONFIG_VOLUME}/dolcevita
 
 # configure folder permissions to allow Verdaccio access
-sudo chown -R 10001:65533 ${VOLUMES_ROOT}${VERDACCIO_CONFIG_VOLUME}
-sudo chown -R 10001:65533 ${VOLUMES_ROOT}${VERDACCIO_STORAGE_VOLUME}
-sudo chown -R 10001:65533 ${VOLUMES_ROOT}${VERDACCIO_PLUGINS_VOLUME}
-sudo chown -R 10001:65533 ${VOLUMES_ROOT}${VERDACCIO_LOGS_VOLUME}
+sudo chown -R 10001:65533 ${VOLUMES_ROOT}/${VERDACCIO_CONFIG_VOLUME}
+sudo chown -R 10001:65533 ${VOLUMES_ROOT}/${VERDACCIO_STORAGE_VOLUME}
+sudo chown -R 10001:65533 ${VOLUMES_ROOT}/${VERDACCIO_PLUGINS_VOLUME}
+sudo chown -R 10001:65533 ${VOLUMES_ROOT}/${VERDACCIO_LOGS_VOLUME}
 
 # re-deploy Verdaccio Docker to let it notice configuration changes
 function_log_message "Redeploying Verdaccio docker-compose..."
