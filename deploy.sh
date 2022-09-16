@@ -1,10 +1,10 @@
 #!/bin/bash
 #
-# Script to deploy Verdaccio server running with Docker Compose with optional ZeroTier One network.
+# Script to deploy Verdaccio a server running with Docker Compose.
 
 
-# color definitions for echo -e output
-# taken from https://stackoverflow.com/questions/5947742/how-to-change-the-output-color-of-echo -e-in-linux
+# Color definitions for echo -e output.
+# Taken from https://stackoverflow.com/questions/5947742/how-to-change-the-output-color-of-echo -e-in-linux
 RED='\e[0;31m'
 GREEN='\e[0;32m'
 LIGHTGREEN='\e[1;32m'
@@ -13,42 +13,60 @@ NOCOLOR='\e[0m'
 BLINK='\e[33;5m'
 
 
-# constants
+# Constants
 EMPTY_STRING=""
-VOLUMES_ROOT="./volumes/"
+VOLUMES_ROOT="volumes/"
 VERDACCIO_CONFIG_VOLUME="verdaccio_conf/"
 VERDACCIO_STORAGE_VOLUME="verdaccio_storage/"
 VERDACCIO_PLUGINS_VOLUME="verdaccio_plugins/"
 VERDACCIO_LOGS_VOLUME="verdaccio_logs/"
 
 
-# variables
+# Variables
 USE_HTTPS=false
 CREATE_HTTPS_CERTS=true
 VERDACCIO_PROTOCOL=http
-VERDACCIO_PORT=4242
+VERDACCIO_PORT=443
 VERDACCIO_DOMAIN=""
 VERDACCIO_EMAIL=""
 
 
-# functions
+# Functions
 function function_log_message {
-  echo -e "${LIGHTGREEN}** $1${NOCOLOR}"
+  echo -e "${LIGHTGREEN}> $1${NOCOLOR}"
 }
 
 function function_print_usage {
-  echo -e "   "
-  echo -e "  Deployment options:"
-  echo -e "    -h   Add this flag to enable HTTPS."
-  echo -e "    -d   Domain name to use for HTTTPS setup."
-  echo -e "    -e   Email to use for HTTTPS setup."
-  echo -e "    -s   Skip HTTPS certificate generation (use if the certs were already generated before)."
-  echo -e "    -p   Port this Verdaccio instance should run on."
-  echo -e "   "
+  echo -e "
+  Deployment options:
+      -h   Add this flag to enable HTTPS.
+      -d   Domain name to use for HTTTPS setup.
+      -e   Email to use for HTTTPS setup.
+      -s   Skip HTTPS certificate generation (use if the certs were already generated before).
+      -p   Port this Verdaccio instance should run on.
+  "
+}
+
+function function_ensure_package_installed {
+  PACKAGE_NAME=$1
+  if dpkg --get-selections | grep -q "^${PACKAGE_NAME}[[:space:]]*install$" >/dev/null; then
+    function_log_message "${PACKAGE_NAME} is already installed."
+  else
+    function_log_message "Installing ${PACKAGE_NAME}..."
+    sudo apt update
+    sudo apt install -y ${PACKAGE_NAME}
+  fi
+}
+
+function function_create_directory_if_doesnt_exist {
+  if [ ! -d $1 ]; then
+    mkdir -p $1;
+  fi
 }
 
 
-# parse flag arguments
+
+# CLI
 while getopts 'hsdepz:c' flag; do
   case "${flag}" in
     h) USE_HTTPS=true;;
@@ -62,47 +80,36 @@ while getopts 'hsdepz:c' flag; do
 done
 
 
-# set environment variables in the .env file
+
+# Set environment variables in the .env file
 function_log_message "Setting environment variables:"
 if $USE_HTTPS; then
   VERDACCIO_PROTOCOL=https
 fi
 sudo echo -e "VERDACCIO_PORT=${VERDACCIO_PORT}\nVERDACCIO_PROTOCOL=${VERDACCIO_PROTOCOL}\nVERDACCIO_DOMAIN=${VERDACCIO_DOMAIN}\nVERDACCIO_EMAIL=${VERDACCIO_EMAIL}" | sudo tee .env
 
-# install Docker and Docker Compose
-function_log_message "Installing Docker and Docker Compose..."
-sudo apt update
-sudo apt install -y docker docker-compose
+# Install Docker and Docker Compose
+function_ensure_package_installed "docker"
+function_ensure_package_installed "docker-compose"
 
-# # deploy Verdaccio Docker to create volumes
-# function_log_message "Initial run of Verdaccio docker-compose to generate volumes..."
-# sudo docker stop verdaccio
-# sudo docker rm verdaccio
-# sudo docker-compose up -d --force-recreate
-
-# create directories
+# Create directories
 function_log_message "Creating directories..."
-sudo mkdir ${VOLUMES_ROOT}/${VERDACCIO_CONFIG_VOLUME}
-sudo mkdir ${VOLUMES_ROOT}/${VERDACCIO_STORAGE_VOLUME}
-sudo mkdir ${VOLUMES_ROOT}/${VERDACCIO_PLUGINS_VOLUME}
-sudo mkdir ${VOLUMES_ROOT}/${VERDACCIO_LOGS_VOLUME}
+function_create_directory_if_doesnt_exist ${VOLUMES_ROOT}/${VERDACCIO_CONFIG_VOLUME}
+function_create_directory_if_doesnt_exist ${VOLUMES_ROOT}/${VERDACCIO_STORAGE_VOLUME}
+function_create_directory_if_doesnt_exist ${VOLUMES_ROOT}/${VERDACCIO_PLUGINS_VOLUME}
+function_create_directory_if_doesnt_exist ${VOLUMES_ROOT}/${VERDACCIO_LOGS_VOLUME}
 
-# generate SSL certificates for HTTPS
+# Generate SSL certificates for HTTPS
 sudo rm -rf https
 if $USE_HTTPS && $CREATE_HTTPS_CERTS; then
-  function_log_message "HTTPS requested. Installing OpenSSL..."
-  sudo apt install -y openssl
+  function_log_message "HTTPS is requested."
+  function_ensure_package_installed "openssl"
 
   function_log_message "Generating SSL certificates..."
-  sudo mkdir https
-  sudo openssl genrsa -out https/verdaccio-key.pem 2048
-  sudo openssl req -new -sha256 -key https/verdaccio-key.pem -out https/verdaccio-csr.pem
-  sudo openssl x509 -req -in https/verdaccio-csr.pem -signkey https/verdaccio-key.pem -out https/verdaccio-cert.pem
-
-  function_log_message "Moving SSL certificates..."
-  sudo mv https/verdaccio-csr.pem ${VOLUMES_ROOT}/${VERDACCIO_CONFIG_VOLUME}/verdaccio-csr.pem
-  sudo mv https/verdaccio-key.pem ${VOLUMES_ROOT}/${VERDACCIO_CONFIG_VOLUME}/verdaccio-key.pem
-  sudo mv https/verdaccio-cert.pem ${VOLUMES_ROOT}/${VERDACCIO_CONFIG_VOLUME}/verdaccio-cert.pem
+  SSL_CERTS_PATH="${VOLUMES_ROOT}/${VERDACCIO_CONFIG_VOLUME}"
+  sudo openssl genrsa -out ${SSL_CERTS_PATH}/verdaccio-key.pem 2048
+  sudo openssl req -new -sha256 -key ${SSL_CERTS_PATH}/verdaccio-key.pem -out ${SSL_CERTS_PATH}/verdaccio-csr.pem
+  sudo openssl x509 -req -in ${SSL_CERTS_PATH}/verdaccio-csr.pem -signkey ${SSL_CERTS_PATH}/verdaccio-key.pem -out ${SSL_CERTS_PATH}/verdaccio-cert.pem
 fi
 
 # copy our configuration into Verdaccio Docker volume
@@ -113,13 +120,11 @@ sudo cp config.yaml ${VOLUMES_ROOT}/${VERDACCIO_CONFIG_VOLUME}/config.yaml
 sudo touch ${VOLUMES_ROOT}/${VERDACCIO_CONFIG_VOLUME}/dolcevita
 
 # configure folder permissions to allow Verdaccio access
-sudo chown -R 10001:65533 ${VOLUMES_ROOT}/${VERDACCIO_CONFIG_VOLUME}
-sudo chown -R 10001:65533 ${VOLUMES_ROOT}/${VERDACCIO_STORAGE_VOLUME}
-sudo chown -R 10001:65533 ${VOLUMES_ROOT}/${VERDACCIO_PLUGINS_VOLUME}
-sudo chown -R 10001:65533 ${VOLUMES_ROOT}/${VERDACCIO_LOGS_VOLUME}
+#sudo chown -R 10001:65533 ${VOLUMES_ROOT}/${VERDACCIO_CONFIG_VOLUME}
+#sudo chown -R 10001:65533 ${VOLUMES_ROOT}/${VERDACCIO_STORAGE_VOLUME}
+#sudo chown -R 10001:65533 ${VOLUMES_ROOT}/${VERDACCIO_PLUGINS_VOLUME}
+#sudo chown -R 10001:65533 ${VOLUMES_ROOT}/${VERDACCIO_LOGS_VOLUME}
 
 # re-deploy Verdaccio Docker to let it notice configuration changes
-function_log_message "Redeploying Verdaccio docker-compose..."
+function_log_message "Recreating Verdaccio docker-compose..."
 sudo docker-compose up -d --force-recreate
-
-# TODO: copy config over to Verdaccio Docker volume?
