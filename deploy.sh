@@ -15,11 +15,13 @@ BLINK='\e[33;5m'
 
 # Constants
 EMPTY_STRING=""
-VOLUMES_ROOT="volumes/"
-VERDACCIO_CONFIG_VOLUME="verdaccio_conf/"
-VERDACCIO_STORAGE_VOLUME="verdaccio_storage/"
-VERDACCIO_PLUGINS_VOLUME="verdaccio_plugins/"
-VERDACCIO_LOGS_VOLUME="verdaccio_logs/"
+VOLUMES_ROOT="verdaccio_volumes"
+CONFIG_VOLUME="${VOLUMES_ROOT}/conf/"
+STORAGE_VOLUME="${VOLUMES_ROOT}/storage/"
+PLUGINS_VOLUME="${VOLUMES_ROOT}/plugins/"
+LOGS_VOLUME="${VOLUMES_ROOT}/logs/"
+VERDACCIO_USER_UID=10001
+VERDACCIO_USER_GROUP=65533
 
 
 # Variables
@@ -32,22 +34,22 @@ VERDACCIO_EMAIL=""
 
 
 # Functions
-function function_log_message {
+function_log_message() {
   echo -e "${LIGHTGREEN}> $1${NOCOLOR}"
 }
 
-function function_print_usage {
+function_print_usage() {
   echo -e "
-  Deployment options:
-      -h   Add this flag to enable HTTPS.
-      -d   Domain name to use for HTTTPS setup.
-      -e   Email to use for HTTTPS setup.
-      -s   Skip HTTPS certificate generation (use if the certs were already generated before).
-      -p   Port this Verdaccio instance should run on.
+  Options:
+      -h, --https      Add this flag to enable HTTPS.
+      -d, --domain     Domain name to use for HTTPS setup.
+      -e, --email      Email to use for HTTPS setup.
+      -s, --skip-certs Skip HTTPS certificate generation (use if the certs were already generated before).
+      -p, --port       Port this Verdaccio instance should run on.
   "
 }
 
-function function_ensure_package_installed {
+function_ensure_package_installed() {
   PACKAGE_NAME=$1
   if dpkg --get-selections | grep -q "^${PACKAGE_NAME}[[:space:]]*install$" >/dev/null; then
     function_log_message "${PACKAGE_NAME} is already installed."
@@ -58,7 +60,7 @@ function function_ensure_package_installed {
   fi
 }
 
-function function_create_directory_if_doesnt_exist {
+function_create_directory_if_doesnt_exist() {
   if [ ! -d $1 ]; then
     mkdir -p $1;
   fi
@@ -66,16 +68,28 @@ function function_create_directory_if_doesnt_exist {
 
 
 
-# CLI
-while getopts 'hsdepz:c' flag; do
-  case "${flag}" in
-    h) USE_HTTPS=true;;
-    s) CREATE_HTTPS_CERTS=false;;
-    d) VERDACCIO_DOMAIN=${OPTARG};;
-    e) VERDACCIO_EMAIL=${OPTARG};;
-    p) VERDACCIO_PORT=${OPTARG};;
-    *) function_print_usage
-       kill -INT $$ ;;
+# CLI (parsing based on https://stackoverflow.com/a/14203146)
+while [[ $# -gt 0 ]]; do
+  case $1 in
+    -h|--https)
+      USE_HTTPS=true
+      shift;;
+    -s|--skip-certs)
+      CREATE_HTTPS_CERTS=false
+      shift;;
+    -d|--domain)
+      VERDACCIO_DOMAIN=$2
+      shift && shift;;
+    -e|--email)
+      VERDACCIO_EMAIL=$2
+      shift && shift;;
+    -p|--port)
+      VERDACCIO_PORT=$2
+      shift && shift;;
+    -*|--*)
+      echo -e "Unknown option: $1"
+      function_print_usage
+      shift;;
   esac
 done
 
@@ -94,37 +108,40 @@ function_ensure_package_installed "docker-compose"
 
 # Create directories
 function_log_message "Creating directories..."
-function_create_directory_if_doesnt_exist ${VOLUMES_ROOT}/${VERDACCIO_CONFIG_VOLUME}
-function_create_directory_if_doesnt_exist ${VOLUMES_ROOT}/${VERDACCIO_STORAGE_VOLUME}
-function_create_directory_if_doesnt_exist ${VOLUMES_ROOT}/${VERDACCIO_PLUGINS_VOLUME}
-function_create_directory_if_doesnt_exist ${VOLUMES_ROOT}/${VERDACCIO_LOGS_VOLUME}
+function_create_directory_if_doesnt_exist ${CONFIG_VOLUME}
+function_create_directory_if_doesnt_exist ${STORAGE_VOLUME}
+function_create_directory_if_doesnt_exist ${PLUGINS_VOLUME}
+function_create_directory_if_doesnt_exist ${LOGS_VOLUME}
 
 # Generate SSL certificates for HTTPS
-sudo rm -rf https
+rm -rf https
 if $USE_HTTPS && $CREATE_HTTPS_CERTS; then
   function_log_message "HTTPS is requested."
   function_ensure_package_installed "openssl"
 
   function_log_message "Generating SSL certificates..."
-  SSL_CERTS_PATH="${VOLUMES_ROOT}/${VERDACCIO_CONFIG_VOLUME}"
-  sudo openssl genrsa -out ${SSL_CERTS_PATH}/verdaccio-key.pem 2048
-  sudo openssl req -new -sha256 -key ${SSL_CERTS_PATH}/verdaccio-key.pem -out ${SSL_CERTS_PATH}/verdaccio-csr.pem
-  sudo openssl x509 -req -in ${SSL_CERTS_PATH}/verdaccio-csr.pem -signkey ${SSL_CERTS_PATH}/verdaccio-key.pem -out ${SSL_CERTS_PATH}/verdaccio-cert.pem
+  sudo openssl genrsa -out ${CONFIG_VOLUME}/verdaccio-key.pem 2048
+  sudo openssl req -new -sha256 -key ${CONFIG_VOLUME}/verdaccio-key.pem -out ${CONFIG_VOLUME}/verdaccio-csr.pem
+  sudo openssl x509 -req -in ${CONFIG_VOLUME}/verdaccio-csr.pem -signkey ${CONFIG_VOLUME}/verdaccio-key.pem -out ${CONFIG_VOLUME}/verdaccio-cert.pem
 fi
 
-# copy our configuration into Verdaccio Docker volume
+# Copy our configuration into Verdaccio Docker volume
 function_log_message "Copying Verdaccio config to Docker volume..."
-sudo cp config.yaml ${VOLUMES_ROOT}/${VERDACCIO_CONFIG_VOLUME}/config.yaml
+sudo cp config.yaml ${CONFIG_VOLUME}/config.yaml
 
-# generate password file
-sudo touch ${VOLUMES_ROOT}/${VERDACCIO_CONFIG_VOLUME}/dolcevita
+# Generate password file
+sudo touch ${CONFIG_VOLUME}/dolcevita
 
-# configure folder permissions to allow Verdaccio access
-#sudo chown -R 10001:65533 ${VOLUMES_ROOT}/${VERDACCIO_CONFIG_VOLUME}
-#sudo chown -R 10001:65533 ${VOLUMES_ROOT}/${VERDACCIO_STORAGE_VOLUME}
-#sudo chown -R 10001:65533 ${VOLUMES_ROOT}/${VERDACCIO_PLUGINS_VOLUME}
-#sudo chown -R 10001:65533 ${VOLUMES_ROOT}/${VERDACCIO_LOGS_VOLUME}
+# Configure folder permissions to allow Verdaccio access
+sudo chown -R ${VERDACCIO_USER_ID}:${VERDACCIO_USER_ID} ${VOLUMES_ROOT}
 
-# re-deploy Verdaccio Docker to let it notice configuration changes
+# Export environment vars required for docker-compose
+export VERDACCIO_PROTOCOL
+export VERDACCIO_PORT
+export VERDACCIO_DOMAIN
+export VERDACCIO_EMAIL
+export VERDACCIO_USER_UID
+
+# Re-deploy Verdaccio Docker to let it notice configuration changes
 function_log_message "Recreating Verdaccio docker-compose..."
-sudo docker-compose up -d --force-recreate
+docker-compose up -d --force-recreate

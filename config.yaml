@@ -3,21 +3,20 @@
 # https://github.com/verdaccio/verdaccio/tree/master/conf
 #
 
-# path to a directory with all packages
+# Path to a directory with all packages
 storage: /verdaccio/storage
-# path to a directory with plugins to include
+# Path to a directory with plugins to include
 plugins: /verdaccio/plugins
 
-#listen:
-#  - 0.0.0.0:4242
+#listen: 0.0.0.0:443 #"https://npm.dev.ivar.taltech.ee/"
 
 web:
   title: Verdaccio
-  # comment out to disable gravatar support
+  # Comment out to disable gravatar support
   # gravatar: false
-  # by default packages are ordercer ascendant (asc|desc)
+  # By default packages are orderced ascendant (asc|desc)
   # sort_packages: asc
-  # convert your UI to the dark side
+  # Convert your UI to the dark side
   darkMode: true
   # logo: http://somedomain/somelogo.png
   # favicon: http://somedomain/favicon.ico | /path/favicon.ico
@@ -33,8 +32,10 @@ auth:
     # Maximum amount of users allowed to register, defaults to "+inf".
     # You can set this to -1 to disable registration.
     max_users: -1
+    # Encryption algorithm
+    algorithm: bcrypt
 
-# a list of other known repositories we can talk to
+# A list of other known repositories we can talk to
 uplinks:
  npmjs:
    url: https://registry.npmjs.org/
@@ -77,6 +78,6 @@ logs: { type: stdout, format: pretty, level: debug }
 #    return signedUrl;
 #  }
 
-# This affect the web and api (not developed yet)
+# This affects the web and api (not developed yet)
 #i18n:
 #web: en-US

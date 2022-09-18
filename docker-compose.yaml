@@ -6,18 +6,19 @@ services:
     container_name: verdaccio
     build: .
     restart: always
+    environment:
+      - VERDACCIO_PORT=${VERDACCIO_PORT}
+      - VERDACCIO_PROTOCOL=${VERDACCIO_PROTOCOL}
+      - VERDACCIO_USER_UID=${VERDACCIO_USER_UID}
+    ports:
+      - $VERDACCIO_PORT:${VERDACCIO_PORT}
+    volumes:
+      - ./verdaccio_volumes/conf:/verdaccio/conf
+      - ./verdaccio_volumes/storage:/verdaccio/storage
+      - ./verdaccio_volumes/plugins:/verdaccio/plugins
+      - ./verdaccio_volumes/logs:/verdaccio/logs
     # networks:
     #   - node-network
-    environment:
-      - VERDACCIO_PORT=$VERDACCIO_PORT
-      - VERDACCIO_PROTOCOL=$VERDACCIO_PROTOCOL
-    ports:
-      - $VERDACCIO_PORT:$VERDACCIO_PORT
-    volumes:
-      - ./volumes/verdaccio_conf:/verdaccio/conf
-      - ./volumes/verdaccio_storage:/verdaccio/storage
-      - ./volumes/verdaccio_plugins:/verdaccio/plugins
-      - ./volumes/verdaccio_logs:/verdaccio/logs
 
   # caddy:
   #   image: abiosoft/caddy
