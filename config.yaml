@@ -57,10 +57,10 @@ middlewares:
   audit:
     enabled: true
 
-https:
-  key: /verdaccio/conf/verdaccio-key.pem
-  cert: /verdaccio/conf/verdaccio-cert.pem
-  ca: /verdaccio/conf/verdaccio-csr.pem
+#https:
+#  key: /verdaccio/conf/verdaccio-key.pem
+#  cert: /verdaccio/conf/verdaccio-cert.pem
+#  ca: /verdaccio/conf/verdaccio-csr.pem
 
 # log settings
 logs: { type: stdout, format: pretty, level: debug }

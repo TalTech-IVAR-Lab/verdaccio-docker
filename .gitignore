@@ -1,5 +1,5 @@
 # Verdaccio volumes
-verdaccio_volumes/*
+volumes/*
 
 # Docker Compose .env file
 .env
