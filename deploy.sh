@@ -131,7 +131,8 @@ sudo touch ${CONFIG_VOLUME}/dolcevita
 
 # Configure folder permissions to allow Verdaccio access
 log_message "Configuring Verdaccio folder permissions..."
-sudo chown -R ${VERDACCIO_USER_ID}:${VERDACCIO_USER_GROUP} ${VERDACCIO_ROOT}
+#sudo chown -R ${VERDACCIO_USER_ID}:${VERDACCIO_USER_GROUP} ${VERDACCIO_ROOT}
+sudo chgrp -R ${VERDACCIO_USER_GROUP} ${VERDACCIO_ROOT}
 
 # Export environment vars required for docker-compose
 log_message "Exporting environment for docker-compose..."
