@@ -7,7 +7,7 @@ services:
     container_name: verdaccio
     restart: always
     environment:
-      - VERDACCIO_PORT=${VERDACCIO_PORT}
+      - VERDACCIO_PORT=4873
       - VERDACCIO_PROTOCOL=${VERDACCIO_PROTOCOL}
       - VERDACCIO_USER_UID=${VERDACCIO_USER_UID}
     ports:
@@ -24,25 +24,11 @@ services:
     restart: always
     environment:
       - ACME_AGREE=true
-      - DOMAIN=$VERDACCIO_DOMAIN
-      - EMAIL=$VERDACCIO_EMAIL
+      - DOMAIN=$DOMAIN
+      - EMAIL=$EMAIL
     ports:
       - 80:80
       - 443:443
     volumes:
       - ./volumes/caddy/Caddyfile:/etc/Caddyfile:ro
       - ./volumes/caddy/caddycerts:/root/.
-
-# volumes:
-#   conf:
-#     driver: local
-#   storage:
-#     driver: local
-#   plugins:
-#     driver: local
-#   logs:
-#     driver: local
-
-# networks:
-#   node-network:
-#     driver: bridge

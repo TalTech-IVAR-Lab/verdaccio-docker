@@ -23,15 +23,13 @@ PLUGINS_VOLUME="${VERDACCIO_ROOT}/plugins/"
 LOGS_VOLUME="${VERDACCIO_ROOT}/logs/"
 VERDACCIO_USER_UID=10001
 VERDACCIO_USER_GROUP=65533
+VERDACCIO_PROTOCOL=http
+VERDACCIO_PORT=4873
 
 
 # Variables
-USE_HTTPS=false
-CREATE_HTTPS_CERTS=true
-VERDACCIO_PROTOCOL=http
-VERDACCIO_PORT=4873
-VERDACCIO_DOMAIN=""
-VERDACCIO_EMAIL=""
+DOMAIN=""
+EMAIL=""
 
 
 # Functions
@@ -48,6 +46,14 @@ print_usage() {
       -s, --skip-certs Skip HTTPS certificate generation (use if the certs were already generated before).
       -p, --port       Port this Verdaccio instance should run on.
   "
+}
+
+require_variable_set() {
+  VAR_NAME=$1
+  if [ -z "${!VAR_NAME}" ]; then
+    echo -e "Variable '$VAR_NAME' is not set. It is required to set up the server.\nPlease make sure you have passed the corresponding CLI flag."
+    exit 1
+  fi
 }
 
 ensure_package_installed() {
@@ -72,20 +78,11 @@ create_directory_if_doesnt_exist() {
 # CLI (parsing based on https://stackoverflow.com/a/14203146)
 while [[ $# -gt 0 ]]; do
   case $1 in
-    -h|--https)
-      USE_HTTPS=true
-      shift;;
-    -s|--skip-certs)
-      CREATE_HTTPS_CERTS=false
-      shift;;
     -d|--domain)
-      VERDACCIO_DOMAIN=$2
+      DOMAIN=$2
       shift && shift;;
     -e|--email)
-      VERDACCIO_EMAIL=$2
-      shift && shift;;
-    -p|--port)
-      VERDACCIO_PORT=$2
+      EMAIL=$2
       shift && shift;;
     -*|--*)
       echo -e "Unknown option: $1"
@@ -94,14 +91,12 @@ while [[ $# -gt 0 ]]; do
   esac
 done
 
-
+# Check if required flags are set
+require_variable_set DOMAIN
 
 # Set environment variables in the .env file
 log_message "Setting environment variables:"
-if $USE_HTTPS; then
-  VERDACCIO_PROTOCOL=https
-fi
-sudo echo -e "VERDACCIO_PORT=${VERDACCIO_PORT}\nVERDACCIO_PROTOCOL=${VERDACCIO_PROTOCOL}\nVERDACCIO_DOMAIN=${VERDACCIO_DOMAIN}\nVERDACCIO_EMAIL=${VERDACCIO_EMAIL}" | sudo tee .env
+sudo echo -e "DOMAIN=${DOMAIN}\nEMAIL=${EMAIL}" | sudo tee .env
 
 # Install Docker and Docker Compose
 ensure_package_installed "docker"
