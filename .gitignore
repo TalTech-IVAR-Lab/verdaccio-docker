@@ -3,3 +3,6 @@ volumes/*
 
 # Docker Compose .env file
 .env
+
+# Temporary files
+*.swp
