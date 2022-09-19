@@ -15,8 +15,8 @@ BLINK='\e[33;5m'
 
 # constants
 EMPTY_STRING=""
-DOCKER_VOLUMES_ROOT="/var/lib/docker/volumes/"
-VERDACCIO_CONFIG_VOLUME="verdacciozerotierdocker_conf/_data/"
+VERDACCIO_ROOT="volumes/verdaccio"
+VERDACCIO_CONFIG_VOLUME="${VERDACCIO_ROOT}/data/"
 VERDACCIO_REGISTRY="http://0.0.0.0:4242"
 
 
