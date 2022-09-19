@@ -40,11 +40,8 @@ log_message() {
 print_usage() {
   echo -e "
   Options:
-      -h, --https      Add this flag to enable HTTPS.
       -d, --domain     Domain name to use for HTTPS setup.
       -e, --email      Email to use for HTTPS setup.
-      -s, --skip-certs Skip HTTPS certificate generation (use if the certs were already generated before).
-      -p, --port       Port this Verdaccio instance should run on.
   "
 }
 
