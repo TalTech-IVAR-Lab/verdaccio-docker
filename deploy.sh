@@ -29,7 +29,7 @@ VERDACCIO_USER_GROUP=65533
 USE_HTTPS=false
 CREATE_HTTPS_CERTS=true
 VERDACCIO_PROTOCOL=http
-VERDACCIO_PORT=443
+VERDACCIO_PORT=4873
 VERDACCIO_DOMAIN=""
 VERDACCIO_EMAIL=""
 
@@ -127,17 +127,22 @@ if $USE_HTTPS && $CREATE_HTTPS_CERTS && false; then
   sudo openssl x509 -req -in ${CONFIG_VOLUME}/verdaccio-csr.pem -signkey ${CONFIG_VOLUME}/verdaccio-key.pem -out ${CONFIG_VOLUME}/verdaccio-cert.pem
 fi
 
-# Copy our configuration into Verdaccio Docker volume
+# Copy our configuration files into the corresponding volumes
 log_message "Copying Verdaccio config to Docker volume..."
 sudo cp config.yaml ${CONFIG_VOLUME}/config.yaml
+log_message "Copying Caddy config to Docker volume..."
+sudo cp Caddyfile ${CADDY_ROOT}/Caddyfile
 
 # Generate password file
+log_message "Generating password file..."
 sudo touch ${CONFIG_VOLUME}/dolcevita
 
 # Configure folder permissions to allow Verdaccio access
+log_message "Configuring Verdaccio folder permissions..."
 sudo chown -R ${VERDACCIO_USER_ID}:${VERDACCIO_USER_GROUP} ${VERDACCIO_ROOT}
 
 # Export environment vars required for docker-compose
+log_message "Exporting environment for docker-compose..."
 export VERDACCIO_PROTOCOL
 export VERDACCIO_PORT
 export VERDACCIO_DOMAIN

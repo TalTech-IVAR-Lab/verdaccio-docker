@@ -11,7 +11,7 @@ services:
       - VERDACCIO_PROTOCOL=${VERDACCIO_PROTOCOL}
       - VERDACCIO_USER_UID=${VERDACCIO_USER_UID}
     ports:
-      - "4873:4873"
+      - 4873:4873
     volumes:
       - ./volumes/verdaccio/conf:/verdaccio/conf
       - ./volumes/verdaccio/storage:/verdaccio/storage
@@ -24,7 +24,7 @@ services:
     restart: always
     environment:
       - ACME_AGREE=true
-      - DOMAIN_NPM=$VERDACCIO_DOMAIN
+      - DOMAIN=$VERDACCIO_DOMAIN
       - EMAIL=$VERDACCIO_EMAIL
     ports:
       - 80:80

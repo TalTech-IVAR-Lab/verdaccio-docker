@@ -1,0 +1,8 @@
+{$DOMAIN} {
+   tls {$EMAIL}
+
+   proxy / verdaccio:4873 {
+       websocket
+       transparent
+   }
+}

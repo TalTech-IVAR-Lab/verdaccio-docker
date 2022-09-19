@@ -62,8 +62,19 @@ middlewares:
 #  cert: /verdaccio/conf/verdaccio-cert.pem
 #  ca: /verdaccio/conf/verdaccio-csr.pem
 
-# log settings
+# Log settings
 logs: { type: stdout, format: pretty, level: debug }
+
+# Security
+security:
+  api:
+    jwt:
+      sign:
+        expiresIn: 15d
+        notBefore: 0
+  web:
+    sign:
+      expiresIn: 7d
 
 #experiments:
 #  # support for npm token command
