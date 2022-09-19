@@ -1,6 +1,6 @@
 #!/bin/bash
 #
-# Script to add user to Verdaccio using htpasswd plugin.
+# Script to remove user from Verdaccio using htpasswd plugin.
 
 
 # Color definitions for echo -e output.
