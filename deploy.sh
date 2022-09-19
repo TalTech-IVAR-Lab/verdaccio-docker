@@ -14,7 +14,6 @@ BLINK='\e[33;5m'
 
 
 # Constants
-EMPTY_STRING=""
 CADDY_ROOT="volumes/caddy"
 VERDACCIO_ROOT="volumes/verdaccio"
 CONFIG_VOLUME="${VERDACCIO_ROOT}/conf/"
@@ -37,18 +36,23 @@ log_message() {
   echo -e "${LIGHTGREEN}> $1${NOCOLOR}"
 }
 
+log_error() {
+  echo -e "${RED}> $1${NOCOLOR}"
+}
+
 print_usage() {
   echo -e "
   Options:
-      -d, --domain     Domain name to use for HTTPS setup.
-      -e, --email      Email to use for HTTPS setup.
+      -d, --domain    Domain name to use for HTTPS setup.
+      -e, --email     Email to use for HTTPS setup.
   "
 }
 
 require_variable_set() {
   VAR_NAME=$1
   if [ -z "${!VAR_NAME}" ]; then
-    echo -e "Variable '$VAR_NAME' is not set. It is required to set up the server.\nPlease make sure you have passed the corresponding CLI flag."
+    log_error "Variable '$VAR_NAME' is not set. It is required to set up the server.\nPlease make sure you have passed the corresponding CLI flag."
+    print_usage
     exit 1
   fi
 }

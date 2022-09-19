@@ -2,6 +2,7 @@
 #
 # Script to add user to Verdaccio using htpasswd plugin.
 
+set -e # Exit if any command fails
 
 # Color definitions for echo -e output.
 # Taken from https://stackoverflow.com/questions/5947742/how-to-change-the-output-color-of-echo -e-in-linux
@@ -54,6 +55,16 @@ ensure_package_installed() {
   fi
 }
 
+ensure_npm_module_installed() {
+  MODULE_NAME=$1
+  if [[ "$(npm list -g $MODULE_NAME)" =~ "empty" ]]; then
+    log_message "Installing ${MODULE_NAME} using npm..."
+    sudo npm install -g ${MODULE_NAME}
+  else
+    log_message "${MODULE_NAME} is already installed."
+  fi
+}
+
 
 # Variables
 USER_NAME=""
@@ -78,11 +89,9 @@ require_variable_set USER_NAME
 
 # Install htpasswd
 ensure_package_installed "npm"
-log_message "Installing htpasswd..."
-sudo npm install -g htpasswd
+ensure_npm_module_installed "htpasswd"
 
 
 # Create user
 log_message "Setting up user '${USER_NAME}'..."
 sudo htpasswd ${PASS_FILE_PATH} ${USER_NAME}
-log_message "User '${USER_NAME}' has been created!"
