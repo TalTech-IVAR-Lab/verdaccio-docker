@@ -30,7 +30,7 @@ You can read more about Verdaccio's `config.yaml` file on their [official docs p
 ## Tips
 
 - You can use utility scripts located in the `scripts` folder of the repository to manage Verdaccio user accounts.
-- If you are running in the cloud (e.g. AWS, GCP), you will need to open ports `80` and `443` for the server to be accessible.
+- If you are running in the cloud (e.g. AWS, GCP), you will need to open ports `80` and `443` for the server to be accessible (`443` is used for HTTPS access and `80` is used for automatic SSL certificate updates).
 
 [1]: https://verdaccio.org/
 [2]: https://caddyserver.com/
